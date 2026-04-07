@@ -1,0 +1,64 @@
+.tabela {
+    width: 60%;
+    margin: 0 auto 2rem;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.cabecalho {
+    background: var(--color-background-tertiary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+}
+
+.cabecalho th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.cabecalho th:first-child {
+    border-radius: var(--border-radius-md) 0 0 0;
+}
+
+.cabecalho th:last-child {
+    border-radius: 0 var(--border-radius-md) 0 0;
+}
+
+.linha {
+    background: var(--color-background-primary);
+    border-left: 0.5px solid var(--color-border-tertiary);
+    border-right: 0.5px solid var(--color-border-tertiary);
+    transition: background 0.15s;
+}
+
+.linha:hover {
+    background: var(--color-background-secondary);
+}
+
+.linha:last-child {
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.linha:last-child td:first-child {
+    border-radius: 0 0 0 var(--border-radius-md);
+}
+
+.linha:last-child td:last-child {
+    border-radius: 0 0 var(--border-radius-md) 0;
+}
+
+.linha td {
+    padding: 10px 16px;
+    color: var(--color-text-secondary);
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.id {
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+    width: 48px;
+}

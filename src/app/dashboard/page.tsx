@@ -1,3 +1,21 @@
-export default function dashboard(){
-    return <div> Hello, World! </div>
-} 
+"use client";
+
+import { useState } from "react";
+import Nav, { Aba } from "./components/nav/nav";
+import Vendas from "./components/vendas/page";
+import CadastroClientes from "./components/cadastro-clientes/page";
+import CadastroProdutos from "./components/cadastro-produtos/page";
+
+export default function Dashboard() {
+    const [abaAtiva, setAbaAtiva] = useState<Aba>("vendas");
+
+    return (
+        <div>
+            <Nav abaAtiva={abaAtiva} onMudarAba={setAbaAtiva} />
+            {abaAtiva === "vendas" && <Vendas />}
+            {abaAtiva === "lista-vendas" && <CadastroProdutos />}
+            {abaAtiva === "cadastro-cliente" && <CadastroClientes />}
+            {abaAtiva === "cadastro-produto" && <CadastroProdutos />}
+        </div>
+    );
+}
