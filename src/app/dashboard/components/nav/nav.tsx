@@ -1,6 +1,7 @@
 "use client";
 
 import styles from "./nav.module.css";
+import { useAuth } from "@/context/AuthContext";
 
 export type Aba = "vendas" | "cadastro-cliente" | "cadastro-produto" | "lista-vendas"
 
@@ -12,8 +13,14 @@ const abas = [
 ];
 
 export default function Nav({ abaAtiva, onMudarAba }: any) {
+
+    const { logout } = useAuth();
+
     return (
         <nav className={styles.nav}>
+            <h1 className={styles.logoEmpresa}>
+                TECNOLOGIA <span>DC</span>
+            </h1>
             {abas.map((aba) => (
                 <button
                     key={aba.id}
@@ -23,6 +30,9 @@ export default function Nav({ abaAtiva, onMudarAba }: any) {
                     {aba.rotulo}
                 </button>
             ))}
+            <button className={styles.btnLogout} onClick={logout}>
+                Sair
+            </button>
         </nav>
     );
 }

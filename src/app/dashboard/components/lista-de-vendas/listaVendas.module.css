@@ -1,0 +1,331 @@
+.tabela {
+    width: 100%;
+    margin: 0 auto 2rem;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.cabecalho {
+    background: var(--color-background-tertiary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+}
+
+.cabecalho th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.cabecalho th:first-child {
+    border-radius: var(--border-radius-md) 0 0 0;
+}
+
+.cabecalho th:last-child {
+    border-radius: 0 var(--border-radius-md) 0 0;
+}
+
+.linha {
+    background: var(--color-background-primary);
+    border-left: 0.5px solid var(--color-border-tertiary);
+    border-right: 0.5px solid var(--color-border-tertiary);
+    transition: background 0.15s;
+}
+
+.linha:hover {
+    background: var(--color-background-secondary);
+}
+
+.linha:last-child {
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.linha:last-child td:first-child {
+    border-radius: 0 0 0 var(--border-radius-md);
+}
+
+.linha:last-child td:last-child {
+    border-radius: 0 0 var(--border-radius-md) 0;
+}
+
+.linha td {
+    padding: 10px 16px;
+    color: var(--color-text-secondary);
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.id {
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+    width: 48px;
+}
+
+.linha td button {
+    margin-right: 5px;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+}
+
+.linha td button:hover {
+    opacity: 0.85;
+}
+
+.linha td button {
+    margin-right: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    cursor: pointer;
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.linha td button:hover {
+    background: var(--color-background-secondary);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-primary);
+}
+
+.btnEditar {
+    color: var(--color-text-info) !important;
+    border-color: var(--color-border-info) !important;
+    background: var(--color-background-info) !important;
+}
+
+.btnExcluir {
+    color: var(--color-text-danger) !important;
+    border-color: var(--color-border-danger) !important;
+    background: var(--color-background-danger) !important;
+}
+
+.btnPdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-danger);
+    background: var(--color-background-danger);
+    color: var(--color-text-danger);
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.btnPdf:hover {
+    opacity: 0.8;
+}
+
+.btnPdf:active {
+    transform: scale(0.97);
+}
+
+.relatorioBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 0.5px solid var(--color-border-tertiary);
+}
+
+.relatorioLabel {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.filtros {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.filtros select,
+.filtros input,
+.filtros button {
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 4px;
+    border: 1px solid var(--color-border-tertiary);
+}
+
+.filtros {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+}
+
+.filtros label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.filtros select,
+.filtros input[type="date"] {
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    height: 32px;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.filtros select:focus,
+.filtros input[type="date"]:focus {
+    border-color: var(--color-border-primary);
+}
+
+.filtroSeparador {
+    width: 0.5px;
+    height: 20px;
+    background: var(--color-border-tertiary);
+    flex-shrink: 0;
+}
+
+.btnFiltrar {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-info);
+    background: var(--color-background-tertiary);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    height: 32px;
+    transition: opacity 0.15s;
+}
+
+.btnFiltrar:hover {
+    opacity: 0.8;
+}
+
+.btnLimpar {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--color-text-secondary);
+    border: .5px solid var(--color-text-secondary) !important;
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    height: 32px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btnLimpar:hover {
+    background: var(--color-background-primary);
+}
+
+.modalOverlay {
+    margin-top: 1.5rem;
+    padding: 20px;
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+}
+
+.modalTitulo {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.modalCampos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.modalCampo {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.modalCampo label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.modalCampo select {
+    padding: 7px 10px;
+    font-size: 13px;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.modalCampo select:focus {
+    border-color: var(--color-border-primary);
+}
+
+.modalAcoes {
+    display: flex;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 0.5px solid var(--color-border-tertiary);
+}
+
+.btnSalvar {
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-success);
+    background: var(--color-background-success);
+    color: var(--color-text-success);
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.btnSalvar:hover {
+    opacity: 0.8;
+}
+
+.btnCancelar {
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-tertiary);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btnCancelar:hover {
+    background: var(--color-background-danger);
+    color: var(--color-text-danger);
+    border-color: var(--color-border-danger);
+}

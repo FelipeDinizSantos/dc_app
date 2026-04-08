@@ -1,5 +1,6 @@
 .nav {
     display: flex;
+    align-items: center;
     justify-content: center;
     gap: 4px;
     width: 100%;
@@ -31,4 +32,32 @@
     background: var(--color-background-tertiary);
     border: 0.5px solid var(--color-border-secondary);
     color: var(--color-text-secondary);
+}
+
+.btnLogout {
+    height: 32px;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-danger);
+    background: transparent;
+    color: var(--color-text-danger);
+    cursor: pointer;
+    margin-left: auto;
+    transition: background 0.15s;
+}
+
+.btnLogout:hover {
+    background: var(--color-background-danger);
+}
+
+.logoEmpresa{
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+    margin: 0 1.5rem;
+
+    span{
+        color: var(--color-background-tertiary);
+    }
 }
