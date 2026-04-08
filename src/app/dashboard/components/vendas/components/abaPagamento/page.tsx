@@ -30,7 +30,7 @@ export default function AbaPagamentos({
 
         const novoArray: Parcela[] = Array.from({ length: numParcelas }, (_, i) => {
             const vencimento = new Date(hoje);
-            vencimento.setMonth(vencimento.getMonth() + i + 1); 
+            vencimento.setMonth(vencimento.getMonth() + i + 1);
 
             const vencimentoStr = vencimento.toISOString().split("T")[0];
 
@@ -50,46 +50,62 @@ export default function AbaPagamentos({
     };
 
     const handleParcelaChange = (id: number, campo: keyof Parcela, valor: string) => {
-        setParcelasInput(prev => ({ ...prev, [id]: valor }));
-
         if (campo === "valor") {
-            let valorNum = parseFloat(valor);
-            if (isNaN(valorNum)) valorNum = 0;
+            setParcelasInput(prev => ({ ...prev, [id]: valor }));
 
-            const novasParcelas = [...parcelas];
-            const idx = novasParcelas.findIndex(p => p.id === id);
-            if (idx === -1) return;
+            setParcelas(prev => {
+                const novasParcelas = [...prev];
+                const idx = novasParcelas.findIndex(p => p.id === id);
+                if (idx === -1) return prev;
 
-            const restante = parseFloat(
-                (valorTotal - valorNum - novasParcelas.reduce((acc, p, i) => (i !== idx ? acc + p.valor : acc), 0)).toFixed(2)
-            );
-            novasParcelas[idx].valor = valorNum;
+                let valorNum = parseFloat(valor);
+                if (isNaN(valorNum)) valorNum = 0;
+                if (valorNum < 0) valorNum = 0;
 
-            const indicesOutros = novasParcelas.map((_, i) => i).filter((i) => i !== idx);
-            const totalOutros = indicesOutros.reduce((acc, i) => acc + novasParcelas[i].valor, 0);
+                novasParcelas[idx] = { ...novasParcelas[idx], valor: valorNum };
 
-            if (totalOutros > 0) {
-                indicesOutros.forEach((i) => {
-                    const proporcao = novasParcelas[i].valor / totalOutros;
-                    novasParcelas[i].valor = parseFloat((novasParcelas[i].valor + proporcao * restante).toFixed(2));
+                const indicesOutros = novasParcelas.map((_, i) => i).filter(i => i !== idx);
+                const totalOutros = indicesOutros.reduce((acc, i) => acc + novasParcelas[i].valor, 0);
+                const restante = parseFloat(
+                    (valorTotal - valorNum - indicesOutros.reduce((acc, i) => acc + novasParcelas[i].valor, 0)).toFixed(2)
+                );
+
+                if (totalOutros > 0) {
+                    indicesOutros.forEach(i => {
+                        const proporcao = novasParcelas[i].valor / totalOutros;
+                        novasParcelas[i] = {
+                            ...novasParcelas[i],
+                            valor: parseFloat((novasParcelas[i].valor + proporcao * restante).toFixed(2))
+                        };
+                    });
+                } else if (indicesOutros.length > 0) {
+                    const valorDistribuir = parseFloat((restante / indicesOutros.length).toFixed(2));
+                    indicesOutros.forEach(i => {
+                        novasParcelas[i] = { ...novasParcelas[i], valor: valorDistribuir };
+                    });
+                }
+
+                const somaFinal = novasParcelas.reduce((acc, p) => acc + p.valor, 0);
+                const diff = parseFloat((valorTotal - somaFinal).toFixed(2));
+                const last = novasParcelas.length - 1;
+                novasParcelas[last] = { ...novasParcelas[last], valor: novasParcelas[last].valor + diff };
+
+                setParcelasInput(prev => {
+                    const next = { ...prev };
+                    indicesOutros.forEach(i => delete next[novasParcelas[i].id]);
+                    return next;
                 });
-            } else if (indicesOutros.length > 0) {
-                const valorDistribuir = parseFloat((restante / indicesOutros.length).toFixed(2));
-                indicesOutros.forEach((i) => (novasParcelas[i].valor = valorDistribuir));
-            }
 
-            const somaFinal = novasParcelas.reduce((acc, p) => acc + p.valor, 0);
-            const diff = parseFloat((valorTotal - somaFinal).toFixed(2));
-            novasParcelas[novasParcelas.length - 1].valor += diff;
-
-            setParcelas(novasParcelas);
+                return novasParcelas;
+            });
         } else {
-            const novasParcelas = [...parcelas];
-            const idx = novasParcelas.findIndex(p => p.id === id);
-            if (idx !== -1) {
-                novasParcelas[idx][campo] = valor as never;
-                setParcelas(novasParcelas);
-            }
+            setParcelas(prev => {
+                const novasParcelas = [...prev];
+                const idx = novasParcelas.findIndex(p => p.id === id);
+                if (idx === -1) return prev;
+                novasParcelas[idx] = { ...novasParcelas[idx], [campo]: valor };
+                return novasParcelas;
+            });
         }
     };
 
@@ -108,18 +124,28 @@ export default function AbaPagamentos({
             return;
         }
 
+        const temValorNegativo = parcelas.some(p => p.valor < 0);
+
+        if (temValorNegativo) {
+            toast.error("Não é permitido parcelas com valor negativo.");
+            return;
+        }
+
         const somaParcelas = parcelas.reduce((acc, p) => acc + p.valor, 0);
-        const valorInvalido = parcelas.some(p => p.valor <= 0);
-        if (valorInvalido) {
-            toast.error("Todos os valores das parcelas devem ser maiores que zero.");
+
+        const soma = Number(somaParcelas.toFixed(2));
+        const total = Number(valorTotal.toFixed(2));
+
+        if (soma < total) {
+            toast.error(`A soma das parcelas (${soma.toFixed(2)}) é MENOR que o total (${total.toFixed(2)}).`);
             return;
         }
-        const diff = Math.abs(somaParcelas - valorTotal);
-        if (diff > 0.01) {
-            toast.error(`A soma das parcelas (${somaParcelas.toFixed(2)}) não corresponde ao valor total (${valorTotal.toFixed(2)}).`);
+
+        if (soma > total) {
+            toast.error(`A soma das parcelas (${soma.toFixed(2)}) é MAIOR que o total (${total.toFixed(2)}).`);
             return;
         }
-        
+
         const itensParaPayload = itensVenda.map(item => ({
             id_produto: item.produto.id,
             valor_unitario: Number(item.valorUnitario),
@@ -158,8 +184,6 @@ export default function AbaPagamentos({
     return (
         <>
             <div className={styles.painelPagamento}>
-
-                {/* Formulário — esquerda */}
                 <div className={styles.painelEsquerdo}>
                     <h2 className={styles.tituloSecao}>Pagamento</h2>
                     <form
@@ -217,7 +241,13 @@ export default function AbaPagamentos({
                                                 type="number"
                                                 value={parcelasInput[parcela.id] ?? parcela.valor.toFixed(2)}
                                                 step={0.01}
+                                                min={0}
                                                 onChange={(e) => handleParcelaChange(parcela.id, "valor", e.target.value)}
+                                                onBlur={() => setParcelasInput(prev => {
+                                                    const next = { ...prev };
+                                                    delete next[parcela.id];
+                                                    return next;
+                                                })}
                                             />
                                         </td>
                                         <td>
