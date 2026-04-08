@@ -35,8 +35,6 @@ a {
   --color-background-primary: #2A2A2A;
   --color-background-secondary: #0A0A0A;
   --color-background-tertiary: #e66101;
-  --color-background-success: #eaf3de;
-  --color-background-danger: #fcebeb;
 
   --color-text-primary: #2b2b2b;
   --color-text-secondary: #ffffff;
@@ -44,9 +42,9 @@ a {
   --color-text-success: #3b6d11;
   --color-text-danger: #a32d2d;
 
-  --color-border-tertiary: #0000001f;
-  --color-border-secondary: #00000033;
-  --color-border-primary: #00000059;
+  --color-border-tertiary: rgba(0, 0, 0, 0.12);
+  --color-border-secondary: rgba(0, 0, 0, 0.2);
+  --color-border-primary: rgba(0, 0, 0, 0.35);
 
   --border-radius-md: 8px;
   --border-radius-lg: 12px;

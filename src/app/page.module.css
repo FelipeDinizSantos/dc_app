@@ -52,7 +52,7 @@
     background: var(--color-background-secondary);
     color: var(--color-text-secondary);
     outline: none;
-    transition: border-color 0.15s, background 0.15s;
+    transition: border-color 0.15s;
 }
 
 .input:focus {

@@ -1,0 +1,1 @@
+export type Aba = "vendas" | "cadastro-cliente" | "cadastro-produto" | "lista-vendas"

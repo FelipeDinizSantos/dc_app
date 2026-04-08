@@ -35,7 +35,7 @@ export default function CadastroProdutos() {
         fetchProdutos();
     }, [produtos]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: any) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
@@ -56,13 +56,13 @@ export default function CadastroProdutos() {
             });
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Erro ao criar registro");
+            if (!res.ok) throw new Error(data.message || "Erro ao registrar produto!");
 
             toast.success("Produto cadastrado!");
             setFormData({ nome: "", valor: 0 });
-        } catch (err: unknown) {
-            if (err instanceof Error) toast.error(err.message);
-            else toast.error("Ocorreu um erro inesperado!");
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message)
         }
     };
 

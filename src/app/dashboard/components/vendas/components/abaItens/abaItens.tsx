@@ -52,8 +52,7 @@ export default function AbaItens({
     };
 
     const removerItem = (index: number) => {
-        const listaAtualizada = [...itensVenda];
-        listaAtualizada.splice(index, 1);
+        const listaAtualizada = [...itensVenda].splice(index, 1);
         setItensVenda(listaAtualizada);
     };
 
@@ -66,10 +65,13 @@ export default function AbaItens({
     };
 
     useEffect(() => {
-        const totalVenda = itensVenda.reduce((acc, item) => acc + item.subTotal, 0);
-        setTotalVenda(totalVenda)
-        setValorTotal(totalVenda);
-    }, [itensVenda])
+        let total = 0;
+        for (let i = 0; i < itensVenda.length; i++) {
+            total += itensVenda[i].subTotal;
+        }
+        setTotalVenda(total);
+        setValorTotal(total);
+    }, [itensVenda]);
 
     return (
         <>
@@ -150,8 +152,8 @@ export default function AbaItens({
                                 </tr>
                             </thead>
                             <tbody>
-                                {itensVenda.map((item, idx) => (
-                                    <tr key={idx}>
+                                {itensVenda.map((item, index) => (
+                                    <tr key={index}>
                                         <td>{item.produto.nome}</td>
                                         <td>
                                             <input
@@ -159,7 +161,7 @@ export default function AbaItens({
                                                 min={1}
                                                 className={styles.input}
                                                 value={item.quantidade}
-                                                onChange={(e) => atualizarItem(idx, "quantidade", Number(e.target.value))}
+                                                onChange={(e) => atualizarItem(index, "quantidade", Number(e.target.value))}
                                             />
                                         </td>
                                         <td>
@@ -168,7 +170,7 @@ export default function AbaItens({
                                                 min={0}
                                                 className={styles.input}
                                                 value={item.valorUnitario}
-                                                onChange={(e) => atualizarItem(idx, "valorUnitario", Number(e.target.value))}
+                                                onChange={(e) => atualizarItem(index, "valorUnitario", Number(e.target.value))}
                                             />
                                         </td>
                                         <td>R$ {item.subTotal.toFixed(2)}</td>
@@ -176,7 +178,7 @@ export default function AbaItens({
                                             <button
                                                 className={styles.botaoAdicionar}
                                                 type="button"
-                                                onClick={() => removerItem(idx)}
+                                                onClick={() => removerItem(index)}
                                             >
                                                 🗑️
                                             </button>

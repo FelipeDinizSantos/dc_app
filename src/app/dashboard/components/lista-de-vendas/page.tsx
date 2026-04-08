@@ -13,13 +13,10 @@ export default function ListaDeVendas() {
     const [vendas, setVendas] = useState<Venda[]>([]);
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [usuarios, setUsuarios] = useState<User[]>([]);
-
     const [filtroCliente, setFiltroCliente] = useState<number | "">("");
     const [filtroDataInicio, setFiltroDataInicio] = useState<string>("");
     const [filtroDataFim, setFiltroDataFim] = useState<string>("");
-
     const [vendasFiltradas, setVendasFiltradas] = useState<Venda[]>([]);
-
     const [vendaEditando, setVendaEditando] = useState<Venda | null>(null);
     const [clienteEdit, setClienteEdit] = useState<number | "">("");
     const [usuarioEdit, setUsuarioEdit] = useState<number | "">("");
@@ -44,7 +41,6 @@ export default function ListaDeVendas() {
                 if (!res.ok) throw new Error('Erro ao buscar clientes');
                 const data: Cliente[] = await res.json();
                 setClientes(data);
-                console.log(data);
             } catch (error: any) {
                 console.error(error);
                 toast.error(error.message);
@@ -86,17 +82,14 @@ export default function ListaDeVendas() {
                 }
             });
 
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData?.mensagem || "Erro ao excluir venda!");
-            }
+            if (!res.ok) throw new Error('Erro ao excluir venda!');
 
             const data = await res.json();
 
             setVendas(prev => prev.filter(v => v.id !== venda.id));
             setVendasFiltradas(prev => prev.filter(v => v.id !== venda.id));
 
-            toast.success(data.mensagem || "Venda excluída com sucesso!");
+            toast.success("Venda excluída com sucesso!");
         } catch (error: any) {
             console.error(error);
             toast.error(error.message);
@@ -123,15 +116,12 @@ export default function ListaDeVendas() {
                 body: JSON.stringify(payload)
             });
 
-            if (!res.ok) {
-                const erro = await res.json();
-                throw new Error(erro?.mensagem || "Erro ao atualizar venda!");
-            }
+            if (!res.ok) throw new Error('Erro ao buscar usuários');
 
-            const updatedVenda: Venda = await res.json();
+            const novaVenda: Venda = await res.json();
 
-            setVendas(prev => prev.map(v => v.id === updatedVenda.id ? updatedVenda : v));
-            setVendasFiltradas(prev => prev.map(v => v.id === updatedVenda.id ? updatedVenda : v));
+            setVendas(prev => prev.map(v => v.id === novaVenda.id ? novaVenda : v));
+            setVendasFiltradas(prev => prev.map(v => v.id === novaVenda.id ? novaVenda : v));
 
             toast.success("Venda atualizada com sucesso!");
             setVendaEditando(null);
@@ -146,11 +136,17 @@ export default function ListaDeVendas() {
     };
 
     const aplicarFiltros = () => {
-        let filtradas = [...vendas];
+        const filtradas: Venda[] = [];
 
-        if (filtroCliente) filtradas = filtradas.filter(v => v.cliente?.id === filtroCliente);
-        if (filtroDataInicio) filtradas = filtradas.filter(v => new Date(v.data) >= new Date(filtroDataInicio));
-        if (filtroDataFim) filtradas = filtradas.filter(v => new Date(v.data) <= new Date(filtroDataFim));
+        for (let i = 0; i < vendas.length; i++) {
+            const venda = vendas[i];
+
+            if (filtroCliente && venda.cliente?.id !== filtroCliente) continue;
+            if (filtroDataInicio && new Date(venda.data) < new Date(filtroDataInicio)) continue;
+            if (filtroDataFim && new Date(venda.data) > new Date(filtroDataFim)) continue;
+
+            filtradas.push(venda);
+        }
 
         setVendasFiltradas(filtradas);
     };

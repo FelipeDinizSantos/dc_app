@@ -3,17 +3,14 @@
 import styles from "./nav.module.css";
 import { useAuth } from "@/context/AuthContext";
 
-export type Aba = "vendas" | "cadastro-cliente" | "cadastro-produto" | "lista-vendas"
-
 const abas = [
-    { id: "vendas", rotulo: "Vendas" },
-    { id: "lista-vendas", rotulo: "Lista de Vendas" },
-    { id: "cadastro-cliente", rotulo: "Cadastrar Cliente" },
-    { id: "cadastro-produto", rotulo: "Cadastrar Produto" },
+    { id: "vendas", label: "Vendas" },
+    { id: "lista-vendas", label: "Lista de Vendas" },
+    { id: "cadastro-cliente", label: "Cadastrar Cliente" },
+    { id: "cadastro-produto", label: "Cadastrar Produto" },
 ];
 
 export default function Nav({ abaAtiva, onMudarAba }: any) {
-
     const { logout } = useAuth();
 
     return (
@@ -27,7 +24,7 @@ export default function Nav({ abaAtiva, onMudarAba }: any) {
                     className={`${styles.item} ${abaAtiva === aba.id ? styles.ativo : ""}`}
                     onClick={() => onMudarAba(aba.id)}
                 >
-                    {aba.rotulo}
+                    {aba.label}
                 </button>
             ))}
             <button className={styles.btnLogout} onClick={logout}>

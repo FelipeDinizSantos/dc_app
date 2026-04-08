@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
         const response = NextResponse.json({ success: true, token: data.token });
 
-        // Token com 1 dias de validade
+        // Token com 1 dia de validade
         response.cookies.set('auth_token', data.token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

@@ -15,13 +15,7 @@ export default function Cadastro() {
 
     const senha = formData.senha;
 
-    const regrasSenha = {
-        tamanho: senha.length >= 8,
-        letra: /[A-Za-z]/.test(senha),
-        numero: /[0-9]/.test(senha),
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: any) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
@@ -33,7 +27,7 @@ export default function Cadastro() {
             senha: formData.senha,
             email: formData.email,
             nome: formData.nome,
-            cpf_cnpj: formData.cpfCnpj,
+            cpf_cnpj: formData.cpfCnpj.replace(/\D/g, ""),
             senha_confirmacao: formData.confirmarSenha,
         };
 
@@ -45,9 +39,9 @@ export default function Cadastro() {
             });
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Erro ao criar registro");
+            if (!res.ok) throw new Error(data.message || "Erro ao cadastrar!");
 
-            toast.success("Usuário cadastrado");
+            toast.success("Usuário cadastrado!");
             setFormData({ nome: "", senha: "", email: "", cpfCnpj: "", confirmarSenha: "" });
         } catch (err: unknown) {
             if (err instanceof Error) toast.error(err.message);
@@ -57,7 +51,7 @@ export default function Cadastro() {
 
     return (
         <div className={styles.card}>
-            <h2 className={styles.title}>Cadastro de usuário</h2>
+            <h2 className={styles.title}>Cadastre-se</h2>
 
             <form onSubmit={handleSubmit}>
 
@@ -109,16 +103,16 @@ export default function Cadastro() {
                     />
                     {senha.length > 0 && (
                         <div className={styles.passwordRules}>
-                            <div className={`${styles.passwordRule} ${regrasSenha.tamanho ? styles.valid : styles.invalid}`}>
-                                <span className={styles.check}>{regrasSenha.tamanho ? "✔" : "✖"}</span>
+                            <div className={`${styles.passwordRule} ${senha.length >= 8 ? styles.valid : styles.invalid}`}>
+                                <span className={styles.check}>{senha.length >= 8 ? "✔" : "✖"}</span>
                                 Mínimo de 8 caracteres
                             </div>
-                            <div className={`${styles.passwordRule} ${regrasSenha.letra ? styles.valid : styles.invalid}`}>
-                                <span className={styles.check}>{regrasSenha.letra ? "✔" : "✖"}</span>
+                            <div className={`${styles.passwordRule} ${/[A-Za-z]/.test(senha) ? styles.valid : styles.invalid}`}>
+                                <span className={styles.check}>{/[A-Za-z]/.test(senha) ? "✔" : "✖"}</span>
                                 Ao menos 1 letra
                             </div>
-                            <div className={`${styles.passwordRule} ${regrasSenha.numero ? styles.valid : styles.invalid}`}>
-                                <span className={styles.check}>{regrasSenha.numero ? "✔" : "✖"}</span>
+                            <div className={`${styles.passwordRule} ${/[0-9]/.test(senha) ? styles.valid : styles.invalid}`}>
+                                <span className={styles.check}>{/[0-9]/.test(senha) ? "✔" : "✖"}</span>
                                 Ao menos 1 número
                             </div>
                         </div>

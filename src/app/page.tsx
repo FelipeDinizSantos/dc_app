@@ -1,4 +1,5 @@
 "use client";
+
 import styles from "./page.module.css";
 
 import { useState } from "react";
@@ -15,6 +16,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
       setLoading(true);
       const user = await login({ email, senha });

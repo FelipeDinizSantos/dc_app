@@ -18,6 +18,7 @@ export default function AbaPagamentos({
     clienteSelecionado: Cliente | null;
     itensVenda: ItemVenda[]
 }) {
+    // Campo input dos valores de cada parcela. Não são as parfcelas em si
     const [parcelasInput, setParcelasInput] = useState<{ [key: number]: string }>({});
     const [numParcelas, setNumParcelas] = useState<number>(1);
     const [parcelas, setParcelas] = useState<Parcela[]>([]);
@@ -25,75 +26,99 @@ export default function AbaPagamentos({
     const gerarParcelas = () => {
         if (numParcelas <= 0) return;
 
-        const valorBase = parseFloat((valorTotal / numParcelas).toFixed(2));
+        const valorInit = parseFloat((valorTotal / numParcelas).toFixed(2));
         const hoje = new Date();
 
-        const novoArray: Parcela[] = Array.from({ length: numParcelas }, (_, i) => {
+        const parcelasFormat: Parcela[] = [];
+
+        for (let i = 0; i < numParcelas; i++) {
             const vencimento = new Date(hoje);
             vencimento.setMonth(vencimento.getMonth() + i + 1);
+            const vencimentoTxt = vencimento.toISOString().split("T")[0];
 
-            const vencimentoStr = vencimento.toISOString().split("T")[0];
-
-            return {
+            const parcela: Parcela = {
                 id: i,
-                valor: valorBase,
-                vencimento: vencimentoStr,
+                valor: valorInit,
+                vencimento: vencimentoTxt,
                 formaPagamento: "dinheiro",
             };
-        });
 
-        const soma = novoArray.reduce((acc, p) => acc + p.valor, 0);
+            parcelasFormat.push(parcela);
+        }
+
+        let soma = 0;
+        for (let i = 0; i < parcelasFormat.length; i++) {
+            soma += parcelasFormat[i].valor;
+        }
+
+        // Calcula a diferença gerada pelo arredondamento, subtraindo e jogando o valor na ultima parcela
         const diff = parseFloat((valorTotal - soma).toFixed(2));
-        novoArray[numParcelas - 1].valor += diff;
-
-        setParcelas(novoArray);
+        parcelasFormat[numParcelas - 1].valor += diff;
+        setParcelas(parcelasFormat);
     };
 
-    const handleParcelaChange = (id: number, campo: keyof Parcela, valor: string) => {
+    const handleChange = (id: number, campo: keyof Parcela, valorInput: string) => {
         if (campo === "valor") {
-            setParcelasInput(prev => ({ ...prev, [id]: valor }));
+            setParcelasInput(prev => {
+                const copia = { ...prev };
+                copia[id] = valorInput;
+                return copia;
+            });
 
             setParcelas(prev => {
                 const novasParcelas = [...prev];
-                const idx = novasParcelas.findIndex(p => p.id === id);
-                if (idx === -1) return prev;
+                const index = novasParcelas.findIndex(p => p.id === id);
+                if (index === -1) return prev;
 
-                let valorNum = parseFloat(valor);
-                if (isNaN(valorNum)) valorNum = 0;
-                if (valorNum < 0) valorNum = 0;
+                let valor = parseFloat(valorInput);
+                if (isNaN(valor)) valor = 0;
+                if (valor < 0) valor = 0;
 
-                novasParcelas[idx] = { ...novasParcelas[idx], valor: valorNum };
+                novasParcelas[index] = { ...novasParcelas[index], valor };
 
-                const indicesOutros = novasParcelas.map((_, i) => i).filter(i => i !== idx);
-                const totalOutros = indicesOutros.reduce((acc, i) => acc + novasParcelas[i].valor, 0);
-                const restante = parseFloat(
-                    (valorTotal - valorNum - indicesOutros.reduce((acc, i) => acc + novasParcelas[i].valor, 0)).toFixed(2)
-                );
-
-                if (totalOutros > 0) {
-                    indicesOutros.forEach(i => {
-                        const proporcao = novasParcelas[i].valor / totalOutros;
-                        novasParcelas[i] = {
-                            ...novasParcelas[i],
-                            valor: parseFloat((novasParcelas[i].valor + proporcao * restante).toFixed(2))
-                        };
-                    });
-                } else if (indicesOutros.length > 0) {
-                    const valorDistribuir = parseFloat((restante / indicesOutros.length).toFixed(2));
-                    indicesOutros.forEach(i => {
-                        novasParcelas[i] = { ...novasParcelas[i], valor: valorDistribuir };
-                    });
+                //Apos mudancça verifica quanto sobra para completar o total da venda, e repassa para parcelas restantes
+                const indicesOutrasParc: number[] = [];
+                for (let i = 0; i < novasParcelas.length; i++) {
+                    if (i !== index) {
+                        indicesOutrasParc.push(i);
+                    }
                 }
 
-                const somaFinal = novasParcelas.reduce((acc, p) => acc + p.valor, 0);
+                let totalOutrasParc = 0;
+                for (let i = 0; i < indicesOutrasParc.length; i++) {
+                    totalOutrasParc += novasParcelas[indicesOutrasParc[i]].valor;
+                }
+                const restante = parseFloat((valorTotal - valor - totalOutrasParc).toFixed(2));
+
+                for (let i = 0; i < indicesOutrasParc.length; i++) {
+                    const indice = indicesOutrasParc[i];
+
+                    // Regra de tres para proporcao de cada parcela para com o total
+                    const proporcao = novasParcelas[indice].valor / totalOutrasParc;
+                    const novoValor = parseFloat((novasParcelas[indice].valor + proporcao * restante).toFixed(2));
+                    novasParcelas[indice] = { ...novasParcelas[indice], valor: novoValor };
+                }
+
+                let somaFinal = 0;
+                for (let i = 0; i < novasParcelas.length; i++) {
+                    somaFinal += novasParcelas[i].valor;
+                }
+
+                // Resolve o mesmo B.O da GerarParcelas (diferença gerada pelo arredondamento)
                 const diff = parseFloat((valorTotal - somaFinal).toFixed(2));
                 const last = novasParcelas.length - 1;
                 novasParcelas[last] = { ...novasParcelas[last], valor: novasParcelas[last].valor + diff };
 
                 setParcelasInput(prev => {
-                    const next = { ...prev };
-                    indicesOutros.forEach(i => delete next[novasParcelas[i].id]);
-                    return next;
+                    const copia = { ...prev };
+
+                    // Usei para remover os inputs antigos e trocar pelos novos re calculados. Para tirar a inconsistencia da UI 
+                    for (let i = 0; i < indicesOutrasParc.length; i++) {
+                        const indice = indicesOutrasParc[i];
+                        delete copia[novasParcelas[indice].id];
+                    }
+
+                    return copia;
                 });
 
                 return novasParcelas;
@@ -101,58 +126,52 @@ export default function AbaPagamentos({
         } else {
             setParcelas(prev => {
                 const novasParcelas = [...prev];
-                const idx = novasParcelas.findIndex(p => p.id === id);
-                if (idx === -1) return prev;
-                novasParcelas[idx] = { ...novasParcelas[idx], [campo]: valor };
+                const index = novasParcelas.findIndex(p => p.id === id);
+                if (index === -1) return prev;
+                novasParcelas[index] = { ...novasParcelas[index], [campo]: valorInput };
                 return novasParcelas;
             });
         }
     };
 
     const salvarVenda = async () => {
-        const salvar = confirm("Tem certeza que deseja salvar a venda?");
-        if (!salvar) return;
+        if (!confirm("Tem certeza que deseja salvar a venda?")) return;
 
         if (!clienteSelecionado) {
             toast.error("Um cliente precisa estar selecionado!");
             return;
         }
 
-        const dataInvalida = parcelas.some(p => !p.vencimento || isNaN(new Date(p.vencimento).getTime()));
-        if (dataInvalida) {
-            toast.error("Todas as parcelas devem ter uma data de vencimento válida.");
-            return;
-        }
-
         const temValorNegativo = parcelas.some(p => p.valor < 0);
-
         if (temValorNegativo) {
             toast.error("Não é permitido parcelas com valor negativo.");
             return;
         }
 
-        const somaParcelas = parcelas.reduce((acc, p) => acc + p.valor, 0);
-
-        const soma = Number(somaParcelas.toFixed(2));
+        let soma = 0;
+        for (let i = 0; i < parcelas.length; i++) {
+            soma += parcelas[i].valor;
+        }
+        soma = Number(soma.toFixed(2));
         const total = Number(valorTotal.toFixed(2));
 
         if (soma < total) {
-            toast.error(`A soma das parcelas (${soma.toFixed(2)}) é MENOR que o total (${total.toFixed(2)}).`);
+            toast.error(`Soma das parcelas é MENOR que o total!`);
             return;
         }
 
         if (soma > total) {
-            toast.error(`A soma das parcelas (${soma.toFixed(2)}) é MAIOR que o total (${total.toFixed(2)}).`);
+            toast.error(`Soma das parcelas é MAIOR que o total!`);
             return;
         }
 
-        const itensParaPayload = itensVenda.map(item => ({
+        const itensPayload = itensVenda.map(item => ({
             id_produto: item.produto.id,
             valor_unitario: Number(item.valorUnitario),
             qtd: item.quantidade
         }));
 
-        const parcelasParaPayload = parcelas.map(p => ({
+        const parcelasPayload = parcelas.map(p => ({
             valor: p.valor,
             data_vencimento: p.vencimento,
             forma_de_pagamento: p.formaPagamento
@@ -160,8 +179,8 @@ export default function AbaPagamentos({
 
         const payload = {
             id_cliente: clienteSelecionado.id,
-            items: itensParaPayload,
-            parcelas: parcelasParaPayload
+            items: itensPayload,
+            parcelas: parcelasPayload
         };
 
         try {
@@ -175,6 +194,9 @@ export default function AbaPagamentos({
             if (!res.ok) throw new Error(data.message || "Erro ao registrar venda");
 
             toast.success("Venda registrada com sucesso!");
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
         } catch (err: unknown) {
             if (err instanceof Error) toast.error(err.message);
             else toast.error("Ocorreu um erro inesperado!");
@@ -232,7 +254,7 @@ export default function AbaPagamentos({
                                                 className={`${styles.input} ${styles.inputTabela}`}
                                                 type="date"
                                                 value={parcela.vencimento}
-                                                onChange={(e) => handleParcelaChange(parcela.id, "vencimento", e.target.value)}
+                                                onChange={(e) => handleChange(parcela.id, "vencimento", e.target.value)}
                                             />
                                         </td>
                                         <td>
@@ -242,7 +264,7 @@ export default function AbaPagamentos({
                                                 value={parcelasInput[parcela.id] ?? parcela.valor.toFixed(2)}
                                                 step={0.01}
                                                 min={0}
-                                                onChange={(e) => handleParcelaChange(parcela.id, "valor", e.target.value)}
+                                                onChange={(e) => handleChange(parcela.id, "valor", e.target.value)}
                                                 onBlur={() => setParcelasInput(prev => {
                                                     const next = { ...prev };
                                                     delete next[parcela.id];
@@ -254,7 +276,7 @@ export default function AbaPagamentos({
                                             <select
                                                 className={`${styles.select} ${styles.selectTabela}`}
                                                 value={parcela.formaPagamento}
-                                                onChange={(e) => handleParcelaChange(parcela.id, "formaPagamento", e.target.value as Parcela["formaPagamento"])}
+                                                onChange={(e) => handleChange(parcela.id, "formaPagamento", e.target.value as Parcela["formaPagamento"])}
                                             >
                                                 <option value="dinheiro">Dinheiro</option>
                                                 <option value="cartao_credito">Cartão Crédito</option>

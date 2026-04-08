@@ -36,7 +36,7 @@ export default function CadastroClientes() {
         fetchClientes();
     }, [clientes]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: any) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
@@ -47,7 +47,7 @@ export default function CadastroClientes() {
         const payload = {
             email: formData.email,
             nome: formData.nome,
-            cpf_cnpj: formData.cpfCnpj,
+            cpf_cnpj: formData.cpfCnpj.replace(/\D/g, ""),
         };
 
         try {
@@ -58,13 +58,13 @@ export default function CadastroClientes() {
             });
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Erro ao criar registro");
+            if (!res.ok) throw new Error(data.message || "Erro ao cadastrar o cliente!");
 
             toast.success("Cliente cadastrado!");
             setFormData({ nome: "", email: "", cpfCnpj: "" });
-        } catch (err: unknown) {
-            if (err instanceof Error) toast.error(err.message);
-            else toast.error("Ocorreu um erro inesperado!");
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message)
         }
     };
 
@@ -107,7 +107,7 @@ export default function CadastroClientes() {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            placeholder="Digite o e-mail"
+                            placeholder="Digite o E-mail"
                         />
                     </div>
 
@@ -129,7 +129,7 @@ export default function CadastroClientes() {
                 <tbody>
                     {clientes.length === 0 ? (
                         <tr>
-                            <td colSpan={4}>
+                            <td>
                                 Nenhum cliente cadastrado
                             </td>
                         </tr>

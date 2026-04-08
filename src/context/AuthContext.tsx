@@ -5,11 +5,10 @@ import {
     useContext,
     useState,
     ReactNode,
-    useRef,
 } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/interfaces/Usuario.interface";
-import { fetchComAuth, limparToken, setToken } from "@/lib/fetchComAuth";
+import { fetchComAuth, setToken } from "@/lib/fetchComAuth";
 
 type AuthContextType = {
     user: User | null;
@@ -36,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const data: { success: boolean; token: string; message?: any } = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || "Erro ao realizar login.");
+                throw new Error("Credenciais inválidas!");
             }
 
             setToken(data.token);
@@ -73,7 +72,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             const data = await res.json();
-            console.log(data.usuario);
             setUser(data.usuario);
             return data.usuario;
         } catch (error) {
