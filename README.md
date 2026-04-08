@@ -1,1 +1,1 @@
-Frontend do aplicação para teste de vaga DEV
+Frontend da aplicação para teste de vaga DEV
