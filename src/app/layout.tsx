@@ -2,6 +2,10 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 
+export const metadata = {
+  title: "TECNOLOGIA DC - Sistema para Teste",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
