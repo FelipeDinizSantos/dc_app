@@ -80,6 +80,9 @@ export default function ListaDeVendas() {
 
     const handleEditar = (venda: Venda) => {
         setVendaEditando(venda);
+
+        setParcelasInputEdit({});
+
         setClienteEdit(venda.cliente?.id || "");
         setUsuarioEdit(venda.usuario?.id || "");
 
@@ -123,32 +126,70 @@ export default function ListaDeVendas() {
         setParcelasEdit(novas);
     };
 
-    const handleParcelaEditChange = (
-        id: number,
-        campo: keyof Parcela,
-        valor: string
-    ) => {
+    const handleParcelaEditChange = (id: number, campo: keyof Parcela, valorInput: string) => {
         if (!vendaEditando) return;
 
         const valorTotal = Number(vendaEditando.valor_total);
 
         if (campo === "valor") {
-            setParcelasInputEdit(prev => ({ ...prev, [id]: valor }));
+            setParcelasInputEdit(prev => ({ ...prev, [id]: valorInput }));
 
             setParcelasEdit(prev => {
                 const novas = [...prev];
                 const index = novas.findIndex(p => p.id === id);
                 if (index === -1) return prev;
 
-                let val = parseFloat(valor);
-                if (isNaN(val)) val = 0;
-                if (val < 0) val = 0;
+                let valor = parseFloat(valorInput);
+                if (isNaN(valor)) valor = 0;
+                if (valor < 0) valor = 0;
 
-                novas[index].valor = val;
+                novas[index].valor = valor;
 
-                let soma = novas.reduce((acc, p) => acc + p.valor, 0);
-                const diff = parseFloat((valorTotal - soma).toFixed(2));
-                novas[novas.length - 1].valor += diff;
+                const indicesOutras: number[] = [];
+                for (let i = 0; i < novas.length; i++) {
+                    if (i !== index) indicesOutras.push(i);
+                }
+
+                let totalOutras = 0;
+                for (let i = 0; i < indicesOutras.length; i++) {
+                    totalOutras += novas[indicesOutras[i]].valor;
+                }
+
+                const restante = parseFloat(
+                    (valorTotal - valor - totalOutras).toFixed(2)
+                );
+
+                for (let i = 0; i < indicesOutras.length; i++) {
+                    const idx = indicesOutras[i];
+
+                    const proporcao =
+                        totalOutras === 0
+                            ? 1 / indicesOutras.length
+                            : novas[idx].valor / totalOutras;
+
+                    const novoValor = parseFloat(
+                        (novas[idx].valor + proporcao * restante).toFixed(2)
+                    );
+
+                    novas[idx].valor = novoValor;
+                }
+
+                let somaFinal = 0;
+                for (let i = 0; i < novas.length; i++) {
+                    somaFinal += novas[i].valor;
+                }
+
+                const diff = parseFloat((valorTotal - somaFinal).toFixed(2));
+                const last = novas.length - 1;
+                novas[last].valor += diff;
+
+                setParcelasInputEdit(prev => {
+                    const copia = { ...prev };
+                    for (let i = 0; i < indicesOutras.length; i++) {
+                        delete copia[novas[indicesOutras[i]].id];
+                    }
+                    return copia;
+                });
 
                 return novas;
             });
@@ -158,7 +199,7 @@ export default function ListaDeVendas() {
                 const index = novas.findIndex(p => p.id === id);
                 if (index === -1) return prev;
 
-                novas[index] = { ...novas[index], [campo]: valor };
+                novas[index] = { ...novas[index], [campo]: valorInput };
                 return novas;
             });
         }
@@ -467,10 +508,12 @@ export default function ListaDeVendas() {
                                         </select>
                                     </td>
                                 </tr>
-                            ))}
+                            ))
+                            }
                         </tbody>
                     </table>
 
+                    <p>Total: R$ {vendaEditando.valor_total}</p>
                     <div className={listaVendasStyles.modalAcoes}>
                         <button
                             className={listaVendasStyles.btnSalvar}
