@@ -52,7 +52,7 @@ export default function AbaItens({
     };
 
     const removerItem = (index: number) => {
-        const listaAtualizada = [...itensVenda].splice(index, 1);
+        const listaAtualizada = itensVenda.filter((_, i) => i !== index);
         setItensVenda(listaAtualizada);
     };
 

@@ -25,6 +25,13 @@ export default function ListaDeVendas() {
     const [parcelasInputEdit, setParcelasInputEdit] = useState<{ [key: number]: string }>({});
     const [numParcelasEdit, setNumParcelasEdit] = useState<number>(1);
 
+
+    const [itensEdit, setItensEdit] = useState<any[]>([]);
+    const [produtos, setProdutos] = useState<any[]>([]);
+    const [produtoSelecionadoEdit, setProdutoSelecionadoEdit] = useState<any | null>(null);
+    const [quantidadeEdit, setQuantidadeEdit] = useState<number>(1);
+    const [valorUnitarioEdit, setValorUnitarioEdit] = useState<number>(0);
+
     useEffect(() => {
         const fetchVendas = async () => {
             try {
@@ -73,10 +80,88 @@ export default function ListaDeVendas() {
             }
         };
 
+        const fetchProdutos = async () => {
+            try {
+                const res = await fetch('/api/laravel/produtos', {
+                    method: "GET",
+                    credentials: "include"
+                });
+                if (!res.ok) throw new Error('Erro ao buscar produtos');
+                const data = await res.json();
+                setProdutos(data);
+            } catch (error: any) {
+                toast.error(error.message);
+            }
+        };
+
+        fetchProdutos();
         fetchVendas();
         fetchClientes();
         fetchUsuarios();
     }, []);
+
+    const recalcularParcelas = (novoTotal: number) => {
+        if (parcelasEdit.length === 0) return;
+        const qtd = parcelasEdit.length;
+        const valorBase = parseFloat((novoTotal / qtd).toFixed(2));
+        const novas = parcelasEdit.map((p, index) => ({
+            ...p,
+            valor: valorBase
+        }));
+        let soma = 0;
+        for (let i = 0; i < novas.length; i++) {
+            soma += novas[i].valor;
+        }
+        const diff = parseFloat((novoTotal - soma).toFixed(2));
+        novas[qtd - 1].valor += diff;
+        setParcelasEdit(novas);
+    };
+
+    useEffect(() => {
+        if (!vendaEditando) return;
+
+        let total = 0;
+        for (let i = 0; i < itensEdit.length; i++) {
+            total += itensEdit[i].subTotal;
+        }
+
+        const totalFormatado = parseFloat(total.toFixed(2));
+
+        setVendaEditando(prev => prev ? {
+            ...prev,
+            valor_total: totalFormatado.toFixed(2)
+        } : null);
+
+        recalcularParcelas(totalFormatado);
+
+    }, [itensEdit]);
+
+    const adicionarItemEdit = () => {
+        if (!produtoSelecionadoEdit) return;
+
+        const novoItem = {
+            produto: produtoSelecionadoEdit,
+            quantidade: quantidadeEdit,
+            valorUnitario: valorUnitarioEdit,
+            subTotal: quantidadeEdit * valorUnitarioEdit,
+        };
+
+        setItensEdit(prev => [...prev, novoItem]);
+        setProdutoSelecionadoEdit(null);
+        setQuantidadeEdit(1);
+        setValorUnitarioEdit(0);
+    };
+
+    const removerItemEdit = (index: number) => {
+        setItensEdit(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const atualizarItemEdit = (index: number, campo: "quantidade" | "valorUnitario", valor: number) => {
+        const lista = [...itensEdit];
+        lista[index][campo] = valor;
+        lista[index].subTotal = lista[index].quantidade * lista[index].valorUnitario;
+        setItensEdit(lista);
+    };
 
     const handleEditar = (venda: Venda) => {
         setVendaEditando(venda);
@@ -95,6 +180,15 @@ export default function ListaDeVendas() {
             formaPagamento: p.forma_de_pagamento || p.formaPagamento
         }));
 
+        const itens = venda.itens.map((item, index) => ({
+            id: index,
+            produto: item.produto,
+            quantidade: item.qtd,
+            valorUnitario: Number(item.valor_unitario),
+            subTotal: Number(item.sub_total),
+        }));
+
+        setItensEdit(itens);
         setParcelasEdit(parcelas);
         setNumParcelasEdit(parcelas.length);
     };
@@ -238,11 +332,18 @@ export default function ListaDeVendas() {
             forma_de_pagamento: p.formaPagamento
         }));
 
+        const itensPayload = itensEdit.map(item => ({
+            id_produto: item.produto.id,
+            qtd: item.quantidade,
+            valor_unitario: item.valorUnitario
+        }));
+
         const payload = {
             id: vendaEditando.id,
             id_cliente: clienteEdit,
             id_usuario: usuarioEdit,
             parcelas: parcelasPayload,
+            itens: itensPayload
         };
 
         try {
@@ -255,9 +356,19 @@ export default function ListaDeVendas() {
                 body: JSON.stringify(payload)
             });
 
-            if (!res.ok) throw new Error('Erro ao buscar usuários');
+            const data = await res.json();
 
-            const novaVenda: Venda = await res.json();
+            if (!res.ok) {
+                console.error("Erro backend:", data);
+
+                throw new Error(
+                    data.message ||
+                    Object.values(data.errors || {}).flat().join(" | ") ||
+                    "Erro ao atualizar a venda!"
+                );
+            }
+
+            const novaVenda: Venda = data;
 
             setVendas(prev =>
                 prev.map(v => (v.id === novaVenda.id ? novaVenda : v))
@@ -269,8 +380,9 @@ export default function ListaDeVendas() {
 
             toast.success("Venda atualizada com sucesso!");
             setVendaEditando(null);
+
         } catch (error: any) {
-            console.error(error);
+            console.error("Erro completo:", error);
             toast.error(error.message);
         }
     };
@@ -420,40 +532,25 @@ export default function ListaDeVendas() {
                     <div className={listaVendasStyles.modalCampos}>
                         <div className={listaVendasStyles.modalCampo}>
                             <label>Cliente</label>
-                            <select
-                                value={clienteEdit}
-                                onChange={e => setClienteEdit(Number(e.target.value) || "")}
-                            >
+                            <select value={clienteEdit} onChange={e => setClienteEdit(Number(e.target.value) || "")}>
                                 <option value="">Selecione cliente</option>
-                                {clientes.map(c => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.nome.toUpperCase()}
-                                    </option>
-                                ))}
+                                {clientes.map(c => <option key={c.id} value={c.id}>{c.nome.toUpperCase()}</option>)}
                             </select>
                         </div>
-
                         <div className={listaVendasStyles.modalCampo}>
                             <label>Usuário</label>
-                            <select
-                                value={usuarioEdit}
-                                onChange={e => setUsuarioEdit(Number(e.target.value) || "")}
-                            >
+                            <select value={usuarioEdit} onChange={e => setUsuarioEdit(Number(e.target.value) || "")}>
                                 <option value="">Selecione usuário</option>
-                                {usuarios.map(u => (
-                                    <option key={u.id} value={u.id}>
-                                        {u.nome.toUpperCase()}
-                                    </option>
-                                ))}
+                                {usuarios.map(u => <option key={u.id} value={u.id}>{u.nome.toUpperCase()}</option>)}
                             </select>
                         </div>
                     </div>
 
-                    <hr />
+                    <hr className={listaVendasStyles.modalDivisor} />
 
-                    <h4>Parcelas</h4>
+                    <p className={listaVendasStyles.modalSubtitulo}>Parcelas</p>
 
-                    <div>
+                    <div className={listaVendasStyles.modalGerarParcelas}>
                         <input
                             type="number"
                             min={1}
@@ -463,70 +560,139 @@ export default function ListaDeVendas() {
                         <button onClick={gerarParcelasEdit}>Gerar</button>
                     </div>
 
-                    <table>
+                    <hr className={listaVendasStyles.modalDivisor} />
+
+                    <p className={listaVendasStyles.modalSubtitulo}>Itens</p>
+
+                    <div className={listaVendasStyles.modalGerarParcelas}>
+                        <select
+                            className={listaVendasStyles.selectProduto}
+                            value={produtoSelecionadoEdit?.id || ""}
+                            onChange={(e) => {
+                                const selected = produtos.find(p => p.id === Number(e.target.value));
+                                setProdutoSelecionadoEdit(selected || null);
+                                if (selected) {
+                                    setValorUnitarioEdit(selected.valor);
+                                    setQuantidadeEdit(1);
+                                }
+                            }}
+                        >
+                            <option value="">Selecione produto</option>
+                            {produtos.map(p => (
+                                <option key={p.id} value={p.id}>
+                                    {p.nome} (R$ {p.valor})
+                                </option>
+                            ))}
+                        </select>
+
+                        {produtoSelecionadoEdit && (
+                            <>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    value={quantidadeEdit}
+                                    onChange={(e) => setQuantidadeEdit(Number(e.target.value))}
+                                />
+
+                                <input
+                                    type="number"
+                                    value={valorUnitarioEdit}
+                                    onChange={(e) => setValorUnitarioEdit(Number(e.target.value))}
+                                />
+
+                                <button onClick={adicionarItemEdit}>+</button>
+                            </>
+                        )}
+                    </div>
+
+                    <table className={listaVendasStyles.modalTabela}>
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Vencimento</th>
+                                <th>Produto</th>
+                                <th>Qtd</th>
                                 <th>Valor</th>
-                                <th>Forma</th>
+                                <th>Subtotal</th>
+                                <th></th>
                             </tr>
                         </thead>
-
                         <tbody>
-                            {parcelasEdit.map(p => (
-                                <tr key={p.id}>
-                                    <td>{p.id + 1}</td>
+                            {itensEdit.map((item, index) => (
+                                <tr key={index}>
+                                    <td>{item.produto.nome}</td>
                                     <td>
                                         <input
-                                            type="date"
-                                            value={p.vencimento}
+                                            type="number"
+                                            min={1}
+                                            value={item.quantidade}
                                             onChange={(e) =>
-                                                handleParcelaEditChange(p.id, "vencimento", e.target.value)
+                                                atualizarItemEdit(index, "quantidade", Number(e.target.value))
                                             }
                                         />
                                     </td>
                                     <td>
                                         <input
                                             type="number"
-                                            value={parcelasInputEdit[p.id] ?? p.valor.toFixed(2)}
+                                            value={item.valorUnitario}
                                             onChange={(e) =>
-                                                handleParcelaEditChange(p.id, "valor", e.target.value)
+                                                atualizarItemEdit(index, "valorUnitario", Number(e.target.value))
                                             }
                                         />
                                     </td>
+                                    <td>R$ {item.subTotal.toFixed(2)}</td>
                                     <td>
-                                        <select
-                                            value={p.formaPagamento}
-                                            onChange={(e) =>
-                                                handleParcelaEditChange(p.id, "formaPagamento", e.target.value)
-                                            }
+                                        <button
+                                            className={listaVendasStyles.btnRemoverItem}
+                                            onClick={() => removerItemEdit(index)}
                                         >
+                                            🗑️
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    <table className={listaVendasStyles.modalTabela}>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Vencimento</th>
+                                <th>Valor</th>
+                                <th>Forma de Pagamento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {parcelasEdit.map(p => (
+                                <tr key={p.id}>
+                                    <td>{p.id + 1}</td>
+                                    <td>
+                                        <input type="date" value={p.vencimento}
+                                            onChange={(e) => handleParcelaEditChange(p.id, "vencimento", e.target.value)} />
+                                    </td>
+                                    <td>
+                                        <input type="number" value={parcelasInputEdit[p.id] ?? p.valor.toFixed(2)}
+                                            onChange={(e) => handleParcelaEditChange(p.id, "valor", e.target.value)} />
+                                    </td>
+                                    <td>
+                                        <select value={p.formaPagamento}
+                                            onChange={(e) => handleParcelaEditChange(p.id, "formaPagamento", e.target.value)}>
                                             <option value="dinheiro">Dinheiro</option>
                                             <option value="pix">Pix</option>
                                             <option value="boleto">Boleto</option>
                                         </select>
                                     </td>
                                 </tr>
-                            ))
-                            }
+                            ))}
                         </tbody>
                     </table>
 
-                    <p>Total: R$ {vendaEditando.valor_total}</p>
+                    <p className={listaVendasStyles.modalTotal}>
+                        Total: R$ {vendaEditando.valor_total}
+                    </p>
+
                     <div className={listaVendasStyles.modalAcoes}>
-                        <button
-                            className={listaVendasStyles.btnSalvar}
-                            onClick={handleSalvarEdicao}
-                        >
-                            Salvar
-                        </button>
-                        <button
-                            className={listaVendasStyles.btnCancelar}
-                            onClick={handleCancelarEdicao}
-                        >
-                            Cancelar
-                        </button>
+                        <button className={listaVendasStyles.btnCancelar} onClick={handleCancelarEdicao}>Cancelar</button>
+                        <button className={listaVendasStyles.btnSalvar} onClick={handleSalvarEdicao}>Salvar</button>
                     </div>
                 </div>
             )}

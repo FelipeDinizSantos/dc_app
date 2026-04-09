@@ -62,3 +62,107 @@
     font-size: 12px;
     width: 48px;
 }
+
+.btnEditar,
+.btnExcluir {
+    height: 28px;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-right: 6px;
+}
+
+.btnEditar {
+    background: var(--color-background-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.btnExcluir {
+    background: transparent;
+    color: var(--color-text-danger);
+    border-color: var(--color-text-danger);
+}
+
+.modalOverlay {
+    width: 60%;
+    margin: 0 auto 2rem;
+    padding: 1.5rem;
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+}
+
+.modalTitulo {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-bottom: 1.25rem;
+}
+
+.modalCampo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 1rem;
+}
+
+.modalCampo label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-tertiary);
+}
+
+.modalCampo input {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 13px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.modalCampo input:focus {
+    border-color: var(--color-border-primary);
+}
+
+.modalAcoes {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 0.5px solid var(--color-border-tertiary);
+}
+
+.btnSalvar,
+.btnCancelar {
+    height: 40px;
+    padding: 0 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    cursor: pointer;
+}
+
+.btnSalvar {
+    background: var(--color-background-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.btnCancelar {
+    background: transparent;
+    color: var(--color-text-secondary);
+}
+
+.btnSalvar:active,
+.btnCancelar:active {
+    transform: scale(0.97);
+}

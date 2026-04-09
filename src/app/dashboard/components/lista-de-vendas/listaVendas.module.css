@@ -96,9 +96,17 @@
 }
 
 .btnEditar {
-    color: var(--color-text-info) !important;
-    border-color: var(--color-border-info) !important;
-    background: var(--color-background-info) !important;
+    height: 28px;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-right: 6px;
+    background: var(--color-background-tertiary) !important;
+    color: var(--color-text-secondary) !important;
 }
 
 .btnExcluir {
@@ -271,7 +279,7 @@
 .modalCampo label {
     font-size: 12px;
     font-weight: 500;
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary) !important;
 }
 
 .modalCampo select {
@@ -318,4 +326,207 @@
     color: var(--color-text-danger);
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
+}
+
+.modalOverlay {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+}
+
+.modalTitulo {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-bottom: 1.25rem;
+}
+
+.modalCampos {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.modalCampo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modalCampo label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-tertiary);
+}
+
+.modalCampo select {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 13px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    outline: none;
+    cursor: pointer;
+    min-width: 200px;
+    transition: border-color 0.15s;
+}
+
+.modalCampo select:focus {
+    border-color: var(--color-border-primary);
+}
+
+.modalDivisor {
+    border: none;
+    border-top: 0.5px solid var(--color-border-tertiary);
+    margin: 1.25rem 0;
+}
+
+.modalSubtitulo {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.modalGerarParcelas {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.modalGerarParcelas input {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 13px;
+    width: 80px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.modalGerarParcelas input:focus {
+    border-color: var(--color-border-primary);
+}
+
+.modalGerarParcelas button {
+    height: 40px;
+    padding: 0 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: var(--color-background-tertiary);
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.modalGerarParcelas button:hover {
+    background: var(--color-background-primary);
+}
+
+.modalGerarParcelas button:active {
+    transform: scale(0.97);
+}
+
+.modalTabela {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 1rem;
+}
+
+.modalTabela thead tr {
+    background: var(--color-background-tertiary);
+}
+
+.modalTabela th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+}
+
+.modalTabela td {
+    padding: 8px 12px;
+    border: 0.5px solid var(--color-border-tertiary);
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+}
+
+.modalTabela input,
+.modalTabela select {
+    height: 34px;
+    padding: 0 10px;
+    font-size: 13px;
+    width: 100%;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.modalTabela input:focus,
+.modalTabela select:focus {
+    border-color: var(--color-border-primary);
+}
+
+.modalTotal {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-align: right;
+    margin-bottom: 1rem;
+}
+
+.modalAcoes {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.modalGerarParcelas .selectProduto {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 13px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    outline: none;
+    cursor: pointer;
+    min-width: 200px;
+    transition: border-color 0.15s;
+}
+
+.modalGerarParcelas .selectProduto:focus {
+    border-color: var(--color-border-primary);
+}
+
+.btnRemoverItem {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 32px;
+    width: 32px;
+    font-size: 14px;
+    background: var(--color-background-tertiary);
+    color: var(--color-text-danger);
+    border: 0.5px solid var(--color-border-danger);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
 }
