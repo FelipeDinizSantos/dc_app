@@ -14,26 +14,26 @@ export default function CadastroProdutos() {
 
     const [produtos, setProdutos] = useState<Produto[]>([]);
 
+    const fetchProdutos = async () => {
+        try {
+            const res = await fetch('/api/laravel/produtos', {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!res.ok) throw new Error('Erro ao buscar produtos');
+
+            const data: Produto[] = await res.json();
+            setProdutos(data);
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message);
+        }
+    };
+
     useEffect(() => {
-        const fetchProdutos = async () => {
-            try {
-                const res = await fetch('/api/laravel/produtos', {
-                    method: "GET",
-                    credentials: "include"
-                });
-
-                if (!res.ok) throw new Error('Erro ao buscar produtos');
-
-                const data: Produto[] = await res.json();
-                setProdutos(data);
-            } catch (error: any) {
-                console.error(error);
-                toast.error(error.message)
-            }
-        };
-
         fetchProdutos();
-    }, [produtos]);
+    }, []);
 
     const handleChange = (e: any) => {
         const { name, value } = e.target;
@@ -60,9 +60,11 @@ export default function CadastroProdutos() {
 
             toast.success("Produto cadastrado!");
             setFormData({ nome: "", valor: 0 });
+
+            fetchProdutos();
         } catch (error: any) {
             console.error(error);
-            toast.error(error.message)
+            toast.error(error.message);
         }
     };
 
@@ -103,6 +105,7 @@ export default function CadastroProdutos() {
 
                 </form>
             </div>
+
             <table className={cadastroClienteStyles.tabela}>
                 <thead className={cadastroClienteStyles.cabecalho}>
                     <tr>
@@ -114,7 +117,7 @@ export default function CadastroProdutos() {
                 <tbody>
                     {produtos.length === 0 ? (
                         <tr>
-                            <td colSpan={4}>
+                            <td colSpan={3}>
                                 Nenhum produto cadastrado
                             </td>
                         </tr>
