@@ -15,26 +15,26 @@ export default function CadastroClientes() {
 
     const [clientes, setClientes] = useState<Cliente[]>([]);
 
+    const fetchClientes = async () => {
+        try {
+            const res = await fetch('/api/laravel/clientes', {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!res.ok) throw new Error('Erro ao buscar clientes');
+
+            const data: Cliente[] = await res.json();
+            setClientes(data);
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message)
+        }
+    };
+
     useEffect(() => {
-        const fetchClientes = async () => {
-            try {
-                const res = await fetch('/api/laravel/clientes', {
-                    method: "GET",
-                    credentials: "include"
-                });
-
-                if (!res.ok) throw new Error('Erro ao buscar clientes');
-
-                const data: Cliente[] = await res.json();
-                setClientes(data);
-            } catch (error: any) {
-                console.error(error);
-                toast.error(error.message)
-            }
-        };
-
         fetchClientes();
-    }, [clientes]);
+    }, []);
 
     const handleChange = (e: any) => {
         const { name, value } = e.target;
@@ -62,6 +62,8 @@ export default function CadastroClientes() {
 
             toast.success("Cliente cadastrado!");
             setFormData({ nome: "", email: "", cpfCnpj: "" });
+
+            fetchClientes();
         } catch (error: any) {
             console.error(error);
             toast.error(error.message)
