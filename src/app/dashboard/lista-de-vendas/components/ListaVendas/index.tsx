@@ -43,7 +43,6 @@ export default function ListaVendas() {
         parcelasEdit,
         setParcelasEdit,
 
-        vendas,
         setVendas,
         fetchAll
     } = useVendas()
@@ -209,14 +208,9 @@ export default function ListaVendas() {
                 for (let i = 0; i < indicesOutras.length; i++) {
                     const idx = indicesOutras[i];
 
-                    const proporcao =
-                        totalOutras === 0
-                            ? 1 / indicesOutras.length
-                            : novas[idx].valor / totalOutras;
+                    const proporcao = totalOutras === 0 ? 1 / indicesOutras.length : novas[idx].valor / totalOutras;
 
-                    const novoValor = parseFloat(
-                        (novas[idx].valor + proporcao * restante).toFixed(2)
-                    );
+                    const novoValor = parseFloat((novas[idx].valor + proporcao * restante).toFixed(2));
 
                     novas[idx].valor = novoValor;
                 }
@@ -311,13 +305,7 @@ export default function ListaVendas() {
             const data = await res.json();
 
             if (!res.ok) {
-                console.error("Erro backend:", data);
-
-                throw new Error(
-                    data.message ||
-                    Object.values(data.errors || {}).flat().join(" | ") ||
-                    "Erro ao atualizar a venda!"
-                );
+                throw new Error(data.message || Object.values(data.errors || {}).flat().join(" | ") || "Erro ao atualizar a venda!");
             }
 
             const novaVenda: Venda = data;
