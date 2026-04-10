@@ -13,7 +13,6 @@ import { Parcela } from "@/interfaces/Parcela.interface";
 export default function ListaDeVendas() {
     const [vendas, setVendas] = useState<Venda[]>([]);
     const [clientes, setClientes] = useState<Cliente[]>([]);
-    const [usuarios, setUsuarios] = useState<User[]>([]);
     const [filtroCliente, setFiltroCliente] = useState<number | "">("");
     const [filtroDataInicio, setFiltroDataInicio] = useState<string>("");
     const [filtroDataFim, setFiltroDataFim] = useState<string>("");
@@ -65,21 +64,6 @@ export default function ListaDeVendas() {
             }
         };
 
-        const fetchUsuarios = async () => {
-            try {
-                const res = await fetch('/api/laravel/usuarios', {
-                    method: "GET",
-                    credentials: "include"
-                });
-                if (!res.ok) throw new Error('Erro ao buscar usuários');
-                const data: User[] = await res.json();
-                setUsuarios(data);
-            } catch (error: any) {
-                console.error(error);
-                toast.error(error.message);
-            }
-        };
-
         const fetchProdutos = async () => {
             try {
                 const res = await fetch('/api/laravel/produtos', {
@@ -97,7 +81,6 @@ export default function ListaDeVendas() {
         fetchProdutos();
         fetchVendas();
         fetchClientes();
-        fetchUsuarios();
     }, []);
 
     const recalcularParcelas = (novoTotal: number) => {
@@ -341,7 +324,6 @@ export default function ListaDeVendas() {
         const payload = {
             id: vendaEditando.id,
             id_cliente: clienteEdit,
-            id_usuario: usuarioEdit,
             parcelas: parcelasPayload,
             itens: itensPayload
         };
@@ -535,13 +517,6 @@ export default function ListaDeVendas() {
                             <select value={clienteEdit} onChange={e => setClienteEdit(Number(e.target.value) || "")}>
                                 <option value="">Selecione cliente</option>
                                 {clientes.map(c => <option key={c.id} value={c.id}>{c.nome.toUpperCase()}</option>)}
-                            </select>
-                        </div>
-                        <div className={listaVendasStyles.modalCampo}>
-                            <label>Usuário</label>
-                            <select value={usuarioEdit} onChange={e => setUsuarioEdit(Number(e.target.value) || "")}>
-                                <option value="">Selecione usuário</option>
-                                {usuarios.map(u => <option key={u.id} value={u.id}>{u.nome.toUpperCase()}</option>)}
                             </select>
                         </div>
                     </div>
