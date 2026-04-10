@@ -23,7 +23,7 @@ ou
 yarn install
 ```
 
-> Crie e edite o arquivo `.env` e configure:
+Crie e edite o arquivo `.env` e configure:
 
 * URL da API 
 
