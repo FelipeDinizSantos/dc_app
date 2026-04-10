@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import styles from "./../../../page.module.css";
-import cadastroClienteStyles from "./cadastroClientes.module.css";
+import { useState } from "react";
+import styles from "./../../../../page.module.css";
+import cadastroClienteStyles from "./styles.module.css";
 import toast from "react-hot-toast";
 import { Cliente } from "@/interfaces/Cliente.interface";
+import { useClientes } from "@/hooks/useClientes";
 
 export default function CadastroClientes() {
     const [formData, setFormData] = useState({
@@ -13,38 +14,24 @@ export default function CadastroClientes() {
         email: "",
     });
 
-    const [clienteEditando, setClienteEditando] = useState<Cliente | null>(null);
-
     const [formEdit, setFormEdit] = useState({
         nome: "",
         cpfCnpj: "",
         email: "",
     });
 
-    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const {
+        clientes,
+        loading,
+        criarCliente,
+        atualizarCliente,
+        deletarCliente,
+        setClientes
+    } = useClientes();
 
-    const fetchClientes = async () => {
-        try {
-            const res = await fetch('/api/laravel/clientes', {
-                method: "GET",
-                credentials: "include"
-            });
+    const [clienteEditando, setClienteEditando] = useState<Cliente | null>(null);
 
-            if (!res.ok) throw new Error('Erro ao buscar clientes');
-
-            const data: Cliente[] = await res.json();
-            setClientes(data);
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.message)
-        }
-    };
-
-    useEffect(() => {
-        fetchClientes();
-    }, []);
-
-    const handleChange = (e: any) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
@@ -61,57 +48,21 @@ export default function CadastroClientes() {
 
     const handleExcluir = async (cliente: Cliente) => {
         if (!confirm(`Deseja realmente excluir o cliente #${cliente.id}?`)) return;
-
-        try {
-            const res = await fetch(`/api/laravel/clientes/${cliente.id}`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) throw new Error(data.message || "Erro ao excluir cliente");
-
-            setClientes(prev => prev.filter(c => c.id !== cliente.id));
-
-            toast.success("Cliente excluído com sucesso!");
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.message);
-        }
+        await deletarCliente(cliente.id);
     };
 
     const handleSalvarEdicao = async () => {
         if (!clienteEditando) return;
 
         const payload = {
-            nome: formEdit.nome,
             email: formEdit.email,
+            nome: formEdit.nome,
             cpf_cnpj: formEdit.cpfCnpj.replace(/\D/g, ""),
         };
 
-        try {
-            const res = await fetch(`/api/laravel/clientes/${clienteEditando.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Erro ao atualizar cliente");
-
-            toast.success("Cliente atualizado!");
-
-            setClientes(prev =>
-                prev.map(c => (c.id === clienteEditando.id ? data.cliente : c))
-            );
-
-            setClienteEditando(null);
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.message);
-        }
-    };
+        await atualizarCliente(clienteEditando.id, payload);
+        setClienteEditando(null);
+    }
 
     const handleCancelarEdicao = () => {
         setClienteEditando(null);
@@ -120,6 +71,18 @@ export default function CadastroClientes() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (!formData.nome.trim()) {
+            return toast.error("Nome é obrigatório");
+        }
+
+        if (!formData.cpfCnpj.trim()) {
+            return toast.error("CPF/CNPJ é obrigatório");
+        }
+
+        if (!formData.email.trim()) {
+            return toast.error("Email é obrigatório");
+        }
+
         const payload = {
             email: formData.email,
             nome: formData.nome,
@@ -127,19 +90,8 @@ export default function CadastroClientes() {
         };
 
         try {
-            const res = await fetch(`/api/laravel/clientes`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Erro ao cadastrar o cliente!");
-
-            toast.success("Cliente cadastrado!");
+            await criarCliente(payload);
             setFormData({ nome: "", email: "", cpfCnpj: "" });
-
-            fetchClientes();
         } catch (error: any) {
             console.error(error);
             toast.error(error.message)
@@ -205,39 +157,51 @@ export default function CadastroClientes() {
                         <th>Ações</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {clientes.length === 0 ? (
-                        <tr>
-                            <td>
-                                Nenhum cliente cadastrado
-                            </td>
-                        </tr>
-                    ) : (
-                        clientes.map((cliente) => (
-                            <tr key={cliente.id} className={cadastroClienteStyles.linha}>
-                                <td className={cadastroClienteStyles.id}>{cliente.id}</td>
-                                <td>{cliente.nome}</td>
-                                <td>{cliente.cpf_cnpj}</td>
-                                <td>{cliente.email}</td>
-                                <td>
-                                    <button
-                                        className={cadastroClienteStyles.btnEditar}
-                                        onClick={() => handleEditar(cliente)}
-                                    >
-                                        Editar
-                                    </button>
-
-                                    <button
-                                        className={cadastroClienteStyles.btnExcluir}
-                                        onClick={() => handleExcluir(cliente)}
-                                    >
-                                        Excluir
-                                    </button>
+                {
+                    loading ? (
+                        <tbody>
+                            <tr>
+                                <td colSpan={5}>
+                                    Carregando...
                                 </td>
                             </tr>
-                        ))
-                    )}
-                </tbody>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {clientes.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5}>
+                                        Nenhum cliente cadastrado
+                                    </td>
+                                </tr>
+                            ) : (
+                                clientes.map((cliente) => (
+                                    <tr key={cliente.id} className={cadastroClienteStyles.linha}>
+                                        <td className={cadastroClienteStyles.id}>{cliente.id}</td>
+                                        <td>{cliente.nome}</td>
+                                        <td>{cliente.cpf_cnpj}</td>
+                                        <td>{cliente.email}</td>
+                                        <td>
+                                            <button
+                                                className={cadastroClienteStyles.btnEditar}
+                                                onClick={() => handleEditar(cliente)}
+                                            >
+                                                Editar
+                                            </button>
+
+                                            <button
+                                                className={cadastroClienteStyles.btnExcluir}
+                                                onClick={() => handleExcluir(cliente)}
+                                            >
+                                                Excluir
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    )
+                }
             </table>
 
             {clienteEditando && (

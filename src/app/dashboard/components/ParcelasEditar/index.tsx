@@ -10,7 +10,7 @@ export default function ParcelasEditor({
 }: {
     valorTotal: number;
     parcelas: Parcela[];
-    setParcelas: (parcelas: Parcela[]) => void;
+    setParcelas: React.Dispatch<React.SetStateAction<Parcela[]>>;
 }) {
 
     const [parcelasInput, setParcelasInput] = useState<{ [key: number]: string }>({});
@@ -51,7 +51,7 @@ export default function ParcelasEditor({
         if (campo === "valor") {
             setParcelasInput(prev => ({ ...prev, [id]: valor }));
 
-            setParcelas(prev => {
+            setParcelas((prev: Parcela[]) => {
                 const novas = [...prev];
                 const index = novas.findIndex(p => p.id === id);
                 if (index === -1) return prev;
@@ -62,7 +62,11 @@ export default function ParcelasEditor({
 
                 novas[index].valor = val;
 
-                let soma = novas.reduce((acc, p) => acc + p.valor, 0);
+                let soma = 0;
+                for (let i = 0; i < novas.length; i++) {
+                    soma += novas[i].valor;
+                }
+
                 const diff = parseFloat((valorTotal - soma).toFixed(2));
 
                 novas[novas.length - 1].valor += diff;
@@ -70,7 +74,7 @@ export default function ParcelasEditor({
                 return novas;
             });
         } else {
-            setParcelas(prev => {
+            setParcelas((prev: Parcela[]) => {
                 const novas = [...prev];
                 const index = novas.findIndex(p => p.id === id);
                 if (index === -1) return prev;

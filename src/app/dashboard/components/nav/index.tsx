@@ -7,8 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 const abas = [
     { href: "/dashboard/criar-vendas", label: "Vendas" },
     { href: "/dashboard/lista-vendas", label: "Lista de Vendas" },
-    { href: "/dashboard/cadastro-cliente", label: "Cadastrar Cliente" },
-    { href: "/dashboard/cadastro-produto", label: "Cadastrar Produto" },
+    { href: "/dashboard/cadastro-de-clientes", label: "Cadastrar Cliente" },
+    { href: "/dashboard/cadastro-de-produtos", label: "Cadastrar Produto" },
 ];
 
 export default function Nav() {

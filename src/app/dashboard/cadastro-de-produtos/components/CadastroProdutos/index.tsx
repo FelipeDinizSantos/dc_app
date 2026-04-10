@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import styles from "./../../../page.module.css";
-import cadastroClienteStyles from "./cadastroProdutos.module.css";
+import { useState } from "react";
+import styles from "./../../../../page.module.css";
+import cadastroClienteStyles from "./styles.module.css";
 import toast from "react-hot-toast";
 import { Produto } from "@/interfaces/Produto.interface";
+import { useProdutos } from "@/hooks/useProdutos";
 
 export default function CadastroProdutos() {
     const [formData, setFormData] = useState({
@@ -14,37 +15,20 @@ export default function CadastroProdutos() {
 
     const [produtoEditando, setProdutoEditando] = useState<Produto | null>(null);
 
+    const {
+        produtos,
+        atualizarProduto,
+        criarProduto,
+        deletarProduto,
+        loading
+    } = useProdutos();
+
     const [formEdit, setFormEdit] = useState({
         nome: "",
         valor: 0,
     });
 
-    const [produtos, setProdutos] = useState<Produto[]>([]);
-
-    const fetchProdutos = async () => {
-        try {
-            const res = await fetch('/api/laravel/produtos', {
-                method: "GET",
-                credentials: "include"
-            });
-
-            console.log(res);
-
-            if (!res.ok) throw new Error('Erro ao buscar produtos');
-
-            const data: Produto[] = await res.json();
-            setProdutos(data);
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.message);
-        }
-    };
-
-    useEffect(() => {
-        fetchProdutos();
-    }, []);
-
-    const handleChange = (e: any) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
@@ -61,54 +45,18 @@ export default function CadastroProdutos() {
     const handleExcluir = async (produto: Produto) => {
         if (!confirm(`Deseja realmente excluir o produto #${produto.id}?`)) return;
 
-        try {
-            const res = await fetch(`/api/laravel/produtos/${produto.id}`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) throw new Error(data.message || "Erro ao excluir produto");
-
-            setProdutos(prev => prev.filter(p => p.id !== produto.id));
-
-            toast.success("Produto excluído com sucesso!");
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.message);
-        }
+        await deletarProduto(produto.id);
     };
 
     const handleSalvarEdicao = async () => {
         if (!produtoEditando) return;
 
-        const payload = {
+        await atualizarProduto(produtoEditando.id, {
             nome: formEdit.nome,
-            valor: Number(formEdit.valor),
-        };
+            valor: formEdit.valor,
+        });
 
-        try {
-            const res = await fetch(`/api/laravel/produtos/${produtoEditando.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Erro ao atualizar produto");
-
-            toast.success("Produto atualizado!");
-
-            setProdutos(prev =>
-                prev.map(p => (p.id === produtoEditando.id ? data.produto : p))
-            );
-
-            setProdutoEditando(null);
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.message);
-        }
+        setProdutoEditando(null);
     };
 
     const handleCancelarEdicao = () => {
@@ -118,29 +66,20 @@ export default function CadastroProdutos() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const payload = {
-            valor: formData.valor,
-            nome: formData.nome,
-        };
-
-        try {
-            const res = await fetch(`/api/laravel/produtos`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Erro ao registrar produto!");
-
-            toast.success("Produto cadastrado!");
-            setFormData({ nome: "", valor: 0 });
-
-            fetchProdutos();
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error.message);
+        if (!formData.nome.trim()) {
+            return toast.error("Nome é obrigatório.");
         }
+
+        if (formData.valor <= 0) {
+            return toast.error("Valor deve ser maior que 0.");
+        }
+
+        await criarProduto({
+            nome: formData.nome,
+            valor: formData.valor,
+        });
+
+        setFormData({ nome: "", valor: 0 });
     };
 
     return (
@@ -246,7 +185,7 @@ export default function CadastroProdutos() {
                         <input
                             type="number"
                             step={0.01}
-                            value={formEdit.valor}
+                            value={formEdit.valor || ""}
                             onChange={(e) =>
                                 setFormEdit({ ...formEdit, valor: Number(e.target.value) })
                             }
@@ -257,12 +196,14 @@ export default function CadastroProdutos() {
                         <button
                             className={cadastroClienteStyles.btnSalvar}
                             onClick={handleSalvarEdicao}
+                            disabled={loading}
                         >
-                            Salvar
+                            {loading ? "Salvando..." : "Salvar"}
                         </button>
                         <button
                             className={cadastroClienteStyles.btnCancelar}
                             onClick={handleCancelarEdicao}
+                            disabled={loading}
                         >
                             Cancelar
                         </button>
