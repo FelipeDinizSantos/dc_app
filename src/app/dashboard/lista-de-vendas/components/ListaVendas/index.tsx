@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import styles from "./../../../page.module.css";
-import listaVendasStyles from "./listaVendas.module.css";
+import styles from "./../../../../page.module.css";
+import listaVendasStyles from "./styles.module.css";
 import toast from "react-hot-toast";
 import { Venda } from "@/interfaces/Venda.interface";
 import { Cliente } from "@/interfaces/Cliente.interface";
-import { User } from "@/interfaces/Usuario.interface";
 import gerarPDF from "@/utils/gerarPDF";
 import { Parcela } from "@/interfaces/Parcela.interface";
 
-export default function ListaDeVendas() {
+export default function ListaVendas() {
     const [vendas, setVendas] = useState<Venda[]>([]);
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [filtroCliente, setFiltroCliente] = useState<number | "">("");
