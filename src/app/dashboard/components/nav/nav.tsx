@@ -1,16 +1,18 @@
 "use client";
-
 import styles from "./nav.module.css";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
 const abas = [
-    { id: "vendas", label: "Vendas" },
-    { id: "lista-vendas", label: "Lista de Vendas" },
-    { id: "cadastro-cliente", label: "Cadastrar Cliente" },
-    { id: "cadastro-produto", label: "Cadastrar Produto" },
+    { href: "/dashboard/criar-vendas", label: "Vendas" },
+    { href: "/dashboard/lista-vendas", label: "Lista de Vendas" },
+    { href: "/dashboard/cadastro-cliente", label: "Cadastrar Cliente" },
+    { href: "/dashboard/cadastro-produto", label: "Cadastrar Produto" },
 ];
 
-export default function Nav({ abaAtiva, onMudarAba }: any) {
+export default function Nav() {
+    const pathname = usePathname();
     const { logout } = useAuth();
 
     return (
@@ -19,13 +21,13 @@ export default function Nav({ abaAtiva, onMudarAba }: any) {
                 TECNOLOGIA <span>DC</span>
             </h1>
             {abas.map((aba) => (
-                <button
-                    key={aba.id}
-                    className={`${styles.item} ${abaAtiva === aba.id ? styles.ativo : ""}`}
-                    onClick={() => onMudarAba(aba.id)}
+                <Link
+                    key={aba.href}
+                    href={aba.href}
+                    className={`${styles.item} ${pathname === aba.href ? styles.ativo : ""}`}
                 >
                     {aba.label}
-                </button>
+                </Link>
             ))}
             <button className={styles.btnLogout} onClick={logout}>
                 Sair

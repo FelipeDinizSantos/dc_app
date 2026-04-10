@@ -1,0 +1,82 @@
+.itemVenda {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    form {
+        display: flex;
+        align-items: flex-end;
+        gap: 1rem;
+        flex-wrap: wrap;
+
+        div {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+}
+
+.input {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 13px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    outline: none;
+    transition: border-color 0.15s;
+    width: 120px;
+}
+
+.input:focus {
+    border-color: var(--color-border-primary);
+}
+
+.input[readOnly] {
+    color: var(--color-text-tertiary);
+    cursor: default;
+}
+
+
+.select {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 13px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    min-width: 200px;
+}
+
+.select:focus {
+    border-color: var(--color-border-primary);
+}
+
+.botaoAdicionar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    padding: 1rem;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+    background: var(--color-background-tertiary);
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: background 0.15s, ;
+}
+
+.label {
+    font-size: 12px;
+    margin-right: .5rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}

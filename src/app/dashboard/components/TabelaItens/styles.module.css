@@ -1,0 +1,80 @@
+.tabelaItens {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.tabelaItens thead tr {
+    background: var(--color-background-tertiary);
+}
+
+.tabelaItens th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+}
+
+.tabelaItens td {
+    padding: 10px 16px;
+    color: var(--color-text-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+}
+
+.tabelaItens tbody tr {
+    background: var(--color-background-primary);
+}
+
+.tabelaItens tbody tr:hover {
+    background: var(--color-background-secondary);
+}
+
+.tabelaItens tfoot td {
+    background: var(--color-background-secondary);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.input {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 13px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    outline: none;
+    transition: border-color 0.15s;
+    width: 120px;
+}
+
+.input:focus {
+    border-color: var(--color-border-primary);
+}
+
+.input[readOnly] {
+    color: var(--color-text-tertiary);
+    cursor: default;
+}
+
+.botaoAdicionar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    padding: 1rem;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+    background: var(--color-background-tertiary);
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: background 0.15s, ;
+}
+
+.totalLabel {
+    text-align: right;
+}

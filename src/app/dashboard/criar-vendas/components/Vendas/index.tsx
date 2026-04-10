@@ -1,32 +1,12 @@
 import { Cliente } from "@/interfaces/Cliente.interface";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { useState } from "react";
 import styles from "./vendas.module.css"
-import Pagamentos from "./components/pagamento/page";
-import { ItemVenda } from "@/interfaces/ItemVenda.interface";
+import { useClientes } from "@/hooks/useClientes";
+import Pagamentos from "./components/Pagamento";
 
 export default function Vendas() {
-    const [clientes, setClientes] = useState<Cliente[]>([]);
-    const [itensVenda, setItensVenda] = useState<ItemVenda[]>([]);
+    const { clientes, loading } = useClientes();
     const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
-
-    useEffect(() => {
-        const fetchClientes = async () => {
-            try {
-                const res = await fetch(`/api/laravel/clientes`, {
-                    method: "GET",
-                    credentials: "include",
-                });
-                if (!res.ok) throw new Error("Erro ao buscar clientes");
-                const data: Cliente[] = await res.json();
-                setClientes(data);
-            } catch (error: any) {
-                console.error(error);
-                toast.error(error.message);
-            }
-        };
-        fetchClientes();
-    }, []);
 
     return (
         <div className={styles.geral}>
@@ -39,12 +19,11 @@ export default function Vendas() {
                             className={styles.select}
                             value={clienteSelecionado?.id || ""}
                             onChange={(e) => {
-                                const encontrado = clientes.find(c => c.id === Number(e.target.value));
-                                setClienteSelecionado(encontrado || null);
+                                setClienteSelecionado(clientes.find(c => c.id === Number(e.target.value)) || null);
                             }}
                         >
-                            <option value="">Selecione</option>
-                            {clientes.map((cliente) => (
+                            <option value="">{loading ? "Carregando..." : "Selecione"}</option>
+                            {!loading && clientes.map((cliente) => (
                                 <option key={cliente.id} value={cliente.id}>
                                     {cliente.nome} ({cliente.cpf_cnpj})
                                 </option>
@@ -75,11 +54,7 @@ export default function Vendas() {
                 </div>
             </div>
 
-            <Pagamentos 
-                clienteSelecionado={clienteSelecionado}
-                itensVenda={itensVenda}
-                setItensVenda={setItensVenda}
-            />
-        </div>
+            <Pagamentos clienteSelecionado={clienteSelecionado} />
+        </div >
     );
 }

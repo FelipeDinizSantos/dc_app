@@ -1,7 +1,6 @@
 .nav {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 4px;
     width: 100%;
     padding: 6px;
@@ -21,11 +20,13 @@
     border-radius: var(--border-radius-md);
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
 }
 
 .item:hover {
     background: var(--color-background-secondary);
-    color: var(--color-text-secondary);
 }
 
 .ativo {
@@ -52,12 +53,12 @@
     background: var(--color-background-danger);
 }
 
-.logoEmpresa{
+.logoEmpresa {
     font-size: 1.2rem;
     color: var(--color-text-secondary);
     margin: 0 1.5rem;
 
-    span{
+    span {
         color: var(--color-background-tertiary);
     }
 }

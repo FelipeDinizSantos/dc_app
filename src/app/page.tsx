@@ -28,7 +28,7 @@ export default function LoginPage() {
       }
 
       toast.success("Logado")
-      return router.replace("/dashboard");
+      return router.replace("/dashboard/criar-vendas");
     } catch (err) {
       if (err instanceof Error) {
         toast.error(err.message);
