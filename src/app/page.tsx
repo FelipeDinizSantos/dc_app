@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,9 +28,13 @@ export default function LoginPage() {
       }
 
       toast.success("Logado")
-      return router.replace("/dashboard/");
-    } catch (err: any) {
-      toast.error(err.message);
+      return router.replace("/dashboard");
+    } catch (err) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error('Erro inesperado. Tente novamente.');
+      }
     } finally {
       setLoading(false);
     }
@@ -44,9 +49,10 @@ export default function LoginPage() {
           <label className={styles.label}>E-mail</label>
           <input
             className={styles.input}
-            type="text"
+            type="email"
             name="email"
             id="email"
+            autoComplete="email"
             placeholder="eu@email.com"
             required
             value={email}
@@ -60,6 +66,7 @@ export default function LoginPage() {
             className={styles.input}
             type={"password"}
             name="password"
+            autoComplete="current-password"
             id="password"
             placeholder="••••••••"
             required
@@ -74,9 +81,9 @@ export default function LoginPage() {
 
         <p className={styles.registerText}>
           Sem acesso?{" "}
-          <a className={styles.registerLink} href="/cadastro">
+          <Link className={styles.registerLink} href="/cadastro">
             Cadastre-se
-          </a>
+          </Link>
         </p>
       </form>
     </div>

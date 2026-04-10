@@ -8,7 +8,6 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/interfaces/Usuario.interface";
-import { fetchComAuth, setToken } from "@/lib/fetchComAuth";
 
 type AuthContextType = {
     user: User | null;
@@ -25,46 +24,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
 
     const login = async ({ email, senha }: { email: string; senha: string }): Promise<User | null> => {
-        try {
-            const response = await fetch("/api/login/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, senha }),
-            });
+        const response = await fetch("/api/login/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, senha }),
+        });
 
-            const data: { success: boolean; token: string; message?: any } = await response.json();
-
-            if (!response.ok) {
-                throw new Error("Credenciais inválidas!");
-            }
-
-            setToken(data.token);
-            return await fetchUser();
-        } catch (e: any) {
-            throw new Error(e);
+        if (!response.ok) {
+            throw new Error("Credenciais inválidas!");
         }
+
+        await response.json();
+
+        return await fetchUser();
+
     };
 
     const logout = async () => {
         try {
-            await fetchComAuth("/api/laravel/auth/logout", { method: "POST" });
+            await fetch("/api/logout", { method: "POST" });
         } catch (e) {
-            console.error("Erro ao fazer logout", e);
-        } finally {
-            try {
-                await fetch("/api/logout", { method: "POST" });
-            } catch (e) {
-                console.error("Erro ao fazer logout", e);
-            } finally {
-                setUser(null);
-                router.push("/");
-            }
+            console.error("Erro ao limpar sessão local:", e);
         }
+
+        setUser(null);
+        router.push("/");
     };
 
     const fetchUser = async (): Promise<User | null> => {
         try {
-            const res = await fetchComAuth(`/api/laravel/auth/me`);
+            const res = await fetch(`/api/me`);
 
             if (res.status === 401) {
                 setUser(null);
@@ -76,7 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return data.usuario;
         } catch (error) {
             console.error("Erro ao buscar usuário:", error);
-            logout();
+            setUser(null);
+            router.push("/");
             return null;
         }
     };
